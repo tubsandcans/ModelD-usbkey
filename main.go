@@ -37,14 +37,19 @@ func setup() error {
 	if devs == 0 {
 		return fmt.Errorf("No midi devices found, returning now")
 	}
+
 	key := regexp.MustCompile("(?i)key")
+	device := regexp.MustCompile("(?i)MODEL\\sD\\s")
+
 	for i := 0; i < devs; i++ {
 		devID := portmidi.DeviceID(i)
 		minfo := portmidi.Info(devID)
 		fmt.Println(minfo)
-		if minfo.Name == "MODEL D" && minfo.IsOutputAvailable {
+		if device.MatchString(minfo.Name) && minfo.IsOutputAvailable {
+			fmt.Printf("Setting model D: %s\n", minfo.Name)
 			outputDevID = devID
 		} else if key.MatchString(minfo.Name) && minfo.IsInputAvailable {
+			fmt.Printf("Setting keyboard: %s\n", minfo.Name)
 			inputDevID = devID
 		}
 	}
