@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"regexp"
 	"syscall"
 
 	"github.com/rakyll/portmidi"
@@ -36,14 +37,15 @@ func setup() error {
 	if devs == 0 {
 		return fmt.Errorf("No midi devices found, returning now")
 	}
+	key := regexp.MustCompile("(?i)key")
 	for i := 0; i < devs; i++ {
 		devID := portmidi.DeviceID(i)
 		minfo := portmidi.Info(devID)
 		fmt.Println(minfo)
-		if minfo.Name == "microKEY2 KEYBOARD" {
-			inputDevID = devID
-		} else if minfo.Name == "MODEL D" && minfo.IsOutputAvailable {
+		if minfo.Name == "MODEL D" && minfo.IsOutputAvailable {
 			outputDevID = devID
+		} else if key.MatchString(minfo.Name) && minfo.IsInputAvailable {
+			inputDevID = devID
 		}
 	}
 
